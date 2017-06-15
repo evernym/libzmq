@@ -35,6 +35,7 @@ set(tests
         test_security_null
         test_security_plain
         test_security_curve
+        test_security_curve_sni
         test_iov
         test_spec_req
         test_spec_rep

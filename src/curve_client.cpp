@@ -257,7 +257,7 @@ int zmq::curve_client_t::produce_hello (msg_t *msg_)
     if (rc == -1)
         return -1;
 
-    rc = msg_->init_size (200);
+    rc = msg_->init_size (232);
     errno_assert (rc == 0);
     uint8_t *hello = static_cast <uint8_t *> (msg_->data ());
 
@@ -272,6 +272,8 @@ int zmq::curve_client_t::produce_hello (msg_t *msg_)
     memcpy (hello + 112, hello_nonce + 16, 8);
     //  Signature, Box [64 * %x0](C'->S)
     memcpy (hello + 120, hello_box + crypto_box_BOXZEROBYTES, 80);
+    //  Server public key
+    memcpy (hello + 200, server_key, crypto_box_PUBLICKEYBYTES);
 
     cn_nonce++;
 

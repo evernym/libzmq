@@ -46,11 +46,12 @@ zmq::curve_server_t::curve_server_t (session_base_t *session_,
     peer_address (peer_address_),
     state (expect_hello),
     cn_nonce (1),
-    cn_peer_nonce(1)
+    cn_peer_nonce(1),
+    curve_key_store(options_.curve_key_store)
 {
     int rc;
     //  Fetch our secret key from socket options
-    memcpy (secret_key, options_.curve_secret_key, crypto_box_SECRETKEYBYTES);
+    memcpy (secret_key, &options_.curve_secret_key, crypto_box_SECRETKEYBYTES);
 
     //  Generate short-term key pair
     rc = crypto_box_keypair (cn_public, cn_secret);
@@ -266,7 +267,8 @@ zmq::mechanism_t::status_t zmq::curve_server_t::status () const
 
 int zmq::curve_server_t::process_hello (msg_t *msg_)
 {
-    if (msg_->size () != 200) {
+    if (msg_->size () != 200 &&
+        msg_->size () != 232) {
         //  Temporary support for security debugging
         puts ("CURVE I: client HELLO is not correct size");
         errno = EPROTO;
@@ -304,6 +306,15 @@ int zmq::curve_server_t::process_hello (msg_t *msg_)
 
     memset (hello_box, 0, crypto_box_BOXZEROBYTES);
     memcpy (hello_box + crypto_box_BOXZEROBYTES, hello + 120, 80);
+
+    if (msg_->size () != 232) {
+        // server public key exists - process it
+        curve_key_t pk;
+        curve_key_t sk;
+        memcpy (&pk, hello + 200, CURVE_KEYSIZE);
+        sk = curve_key_store[pk];
+        memcpy(&secret_key, &sk.key, CURVE_KEYSIZE);
+    }
 
     //  Open Box [64 * %x0](C'->S)
     int rc = crypto_box_open (hello_plaintext, hello_box,

@@ -29,6 +29,7 @@
 
 #include "precompiled.hpp"
 #include <string.h>
+#include <stdio.h>
 
 #include "options.hpp"
 #include "err.hpp"
@@ -81,9 +82,9 @@ zmq::options_t::options_t () :
     heartbeat_timeout (-1),
     use_fd (-1)
 {
-    memset (curve_public_key, 0, CURVE_KEYSIZE);
-    memset (curve_secret_key, 0, CURVE_KEYSIZE);
-    memset (curve_server_key, 0, CURVE_KEYSIZE);
+    memset (&curve_public_key, 0, CURVE_KEYSIZE);
+    memset (&curve_secret_key, 0, CURVE_KEYSIZE);
+    memset (&curve_server_key, 0, CURVE_KEYSIZE);
 #if defined ZMQ_HAVE_VMCI
     vmci_buffer_size = 0;
     vmci_buffer_min_size = 0;
@@ -92,17 +93,30 @@ zmq::options_t::options_t () :
 #endif
 }
 
-int zmq::options_t::set_curve_key(uint8_t * destination, const void * optval_, size_t optvallen_)
+bool zmq::operator==(const zmq::curve_key_t &lhs, const zmq::curve_key_t &rhs) {
+  return !memcmp(lhs.key, rhs.key, CURVE_KEYSIZE);
+}
+
+void hexdump_curve_key(const zmq::curve_key_t *k)
+{
+  for(int i = 0; i< CURVE_KEYSIZE; i++)
+  {
+    printf("%02hhX ", k->key[i]);
+  }
+}
+
+
+int zmq::options_t::set_curve_key(curve_key_t *destination, const void * optval_, size_t optvallen_)
 {
     switch (optvallen_) {
 
         case CURVE_KEYSIZE:
-            memcpy (destination, optval_, optvallen_);
+            memcpy ((uint8_t*)destination, optval_, optvallen_);
             mechanism = ZMQ_CURVE;
             return 0;
 
         case CURVE_KEYSIZE_Z85 + 1:
-            if (zmq_z85_decode (destination, (char *) optval_)) {
+            if (zmq_z85_decode ((uint8_t*)destination, (char *) optval_)) {
                 mechanism = ZMQ_CURVE;
                 return 0;
             }
@@ -112,7 +126,7 @@ int zmq::options_t::set_curve_key(uint8_t * destination, const void * optval_, s
             char z85_key [CURVE_KEYSIZE_Z85 + 1];
             memcpy (z85_key, (char *) optval_, optvallen_);
             z85_key [CURVE_KEYSIZE_Z85] = 0;
-            if (zmq_z85_decode (destination, z85_key)) {
+            if (zmq_z85_decode ((uint8_t*)destination, z85_key)) {
                 mechanism = ZMQ_CURVE;
                 return 0;
             }
@@ -452,19 +466,35 @@ int zmq::options_t::setsockopt (int option_, const void *optval_,
             break;
 
         case ZMQ_CURVE_PUBLICKEY:
-            if(0 == set_curve_key(curve_public_key, optval_, optvallen_)) {
+            if(0 == set_curve_key(&curve_public_key, optval_, optvallen_)) {
                 return 0;
             }
             break;
 
         case ZMQ_CURVE_SECRETKEY:
-            if(0 == set_curve_key(curve_secret_key, optval_, optvallen_)) {
-                return 0;
+            if(0 == set_curve_key(&curve_secret_key, optval_, optvallen_)) {
+              static uint8_t zero[CURVE_KEYSIZE] = { 0 };
+              if(as_server && !memcmp(&curve_public_key, zero, CURVE_KEYSIZE)) {
+                curve_key_store.insert(std::make_pair(curve_public_key, curve_secret_key));
+
+                printf("-------------------------------------\n");
+                for (std::unordered_map<curve_key_t,curve_key_t>::iterator it=curve_key_store.begin();
+                     it!=curve_key_store.end();
+                     it++)
+                {
+                  hexdump_curve_key(&it->first);
+                  printf("    ");
+                  hexdump_curve_key(&it->second);
+                  printf("\n");
+                }
+                printf("-------------------------------------\n");
+              }
+              return 0;
             }
             break;
 
         case ZMQ_CURVE_SERVERKEY:
-            if(0 == set_curve_key(curve_server_key, optval_, optvallen_)) {
+            if(0 == set_curve_key(&curve_server_key, optval_, optvallen_)) {
                 as_server = 0;
                 return 0;
             }
@@ -890,36 +920,36 @@ int zmq::options_t::getsockopt (int option_, void *optval_, size_t *optvallen_) 
 
         case ZMQ_CURVE_PUBLICKEY:
             if (*optvallen_ == CURVE_KEYSIZE) {
-                memcpy (optval_, curve_public_key, CURVE_KEYSIZE);
+                memcpy (optval_, &curve_public_key, CURVE_KEYSIZE);
                 return 0;
             }
             else
             if (*optvallen_ == CURVE_KEYSIZE_Z85 + 1) {
-                zmq_z85_encode ((char *) optval_, curve_public_key, CURVE_KEYSIZE);
+                zmq_z85_encode ((char *) optval_, (uint8_t*)&curve_public_key, CURVE_KEYSIZE);
                 return 0;
             }
             break;
 
         case ZMQ_CURVE_SECRETKEY:
             if (*optvallen_ == CURVE_KEYSIZE) {
-                memcpy (optval_, curve_secret_key, CURVE_KEYSIZE);
+                memcpy (optval_, &curve_secret_key, CURVE_KEYSIZE);
                 return 0;
             }
             else
             if (*optvallen_ == CURVE_KEYSIZE_Z85 + 1) {
-                zmq_z85_encode ((char *) optval_, curve_secret_key, CURVE_KEYSIZE);
+                zmq_z85_encode ((char *) optval_, (uint8_t*)&curve_secret_key, CURVE_KEYSIZE);
                 return 0;
             }
             break;
 
         case ZMQ_CURVE_SERVERKEY:
             if (*optvallen_ == CURVE_KEYSIZE) {
-                memcpy (optval_, curve_server_key, CURVE_KEYSIZE);
+                memcpy (optval_, &curve_server_key, CURVE_KEYSIZE);
                 return 0;
             }
             else
             if (*optvallen_ == CURVE_KEYSIZE_Z85 + 1) {
-                zmq_z85_encode ((char *) optval_, curve_server_key, CURVE_KEYSIZE);
+                zmq_z85_encode ((char *) optval_, (uint8_t*)&curve_server_key, CURVE_KEYSIZE);
                 return 0;
             }
             break;

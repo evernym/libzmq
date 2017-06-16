@@ -45,9 +45,9 @@ zmq::curve_client_t::curve_client_t (const options_t &options_) :
     cn_peer_nonce(1)
 {
     int rc;
-    memcpy (public_key, options_.curve_public_key, crypto_box_PUBLICKEYBYTES);
-    memcpy (secret_key, options_.curve_secret_key, crypto_box_SECRETKEYBYTES);
-    memcpy (server_key, options_.curve_server_key, crypto_box_PUBLICKEYBYTES);
+    memcpy (public_key, &options_.curve_public_key, crypto_box_PUBLICKEYBYTES);
+    memcpy (secret_key, &options_.curve_secret_key, crypto_box_SECRETKEYBYTES);
+    memcpy (server_key, &options_.curve_server_key, crypto_box_PUBLICKEYBYTES);
 
     //  Generate short-term key pair
     rc = crypto_box_keypair (cn_public, cn_secret);

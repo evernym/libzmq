@@ -174,14 +174,14 @@ int main (void)
     rc = zmq_setsockopt (server, ZMQ_CURVE_SERVER, &as_server, sizeof (int));
     assert (rc == 0);
 
-    rc = zmq_setsockopt (server, ZMQ_CURVE_SECRETKEY, server1_secret, 41);
-    assert (rc == 0);
     rc = zmq_setsockopt (server, ZMQ_CURVE_PUBLICKEY, server1_public, 41);
     assert (rc == 0);
-
-    rc = zmq_setsockopt (server, ZMQ_CURVE_SECRETKEY, server2_secret, 41);
+    rc = zmq_setsockopt (server, ZMQ_CURVE_SECRETKEY, server1_secret, 41);
     assert (rc == 0);
+
     rc = zmq_setsockopt (server, ZMQ_CURVE_PUBLICKEY, server2_public, 41);
+    assert (rc == 0);
+    rc = zmq_setsockopt (server, ZMQ_CURVE_SECRETKEY, server2_secret, 41);
     assert (rc == 0);
 
     rc = zmq_setsockopt (server, ZMQ_IDENTITY, "IDENT", 6);

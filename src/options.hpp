@@ -33,6 +33,8 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <unordered_map>
+#include <string.h>
 
 #include "stddef.h"
 #include "stdint.hpp"
@@ -52,11 +54,42 @@
 
 namespace zmq
 {
+  struct curve_key_t
+  {
+    uint8_t key[CURVE_KEYSIZE];
+  };
+
+  bool operator==(const zmq::curve_key_t &lhs, const zmq::curve_key_t &rhs);
+}
+
+namespace std {
+
+  template <>
+  struct hash<zmq::curve_key_t>
+  {
+    std::size_t operator()(const zmq::curve_key_t& k) const
+    {
+      using std::size_t;
+      using std::hash;
+      using std::string;
+
+      std::size_t ret = 0;
+      for(int i=0; i< CURVE_KEYSIZE; i++)
+      {
+        ret ^= hash<unsigned char>{}((unsigned char)k.key[i]);
+      }
+      return ret;
+    }
+  };
+}
+
+namespace zmq
+{
     struct options_t
     {
         options_t ();
 
-        int set_curve_key(uint8_t * destination, const void * optval_, size_t optvallen_);
+        int set_curve_key(curve_key_t *destination, const void * optval_, size_t optvallen_);
 
         int setsockopt (int option_, const void *optval_, size_t optvallen_);
         int getsockopt (int option_, void *optval_, size_t *optvallen_) const;
@@ -191,9 +224,10 @@ namespace zmq
         std::string plain_password;
 
         //  Security credentials for CURVE mechanism
-        uint8_t curve_public_key [CURVE_KEYSIZE];
-        uint8_t curve_secret_key [CURVE_KEYSIZE];
-        uint8_t curve_server_key [CURVE_KEYSIZE];
+        curve_key_t curve_public_key;
+        curve_key_t curve_secret_key;
+        curve_key_t curve_server_key;
+        std::unordered_map<curve_key_t, curve_key_t> curve_key_store;
 
         //  Principals for GSSAPI mechanism
         std::string gss_principal;

@@ -211,24 +211,10 @@ int main (void)
 
     void *client;
     //  Check CURVE security with valid credentials
+    puts("Check CURVE security with valid credentials");
     client = zmq_socket (ctx, ZMQ_DEALER);
     assert (client);
     rc = zmq_setsockopt (client, ZMQ_CURVE_SERVERKEY, server1_public, 41);
-    assert (rc == 0);
-    rc = zmq_setsockopt (client, ZMQ_CURVE_PUBLICKEY, client_public, 41);
-    assert (rc == 0);
-    rc = zmq_setsockopt (client, ZMQ_CURVE_SECRETKEY, client_secret, 41);
-    assert (rc == 0);
-    rc = zmq_connect (client, my_endpoint);
-    assert (rc == 0);
-    bounce (server, client);
-    rc = zmq_close (client);
-    assert (rc == 0);
-
-    //  Check CURVE security with valid credentials
-    client = zmq_socket (ctx, ZMQ_DEALER);
-    assert (client);
-    rc = zmq_setsockopt (client, ZMQ_CURVE_SERVERKEY, server2_public, 41);
     assert (rc == 0);
     rc = zmq_setsockopt (client, ZMQ_CURVE_PUBLICKEY, client_public, 41);
     assert (rc == 0);
@@ -245,7 +231,29 @@ int main (void)
     assert (event == ZMQ_EVENT_HANDSHAKE_SUCCEED);
 #endif
 
+    //  Check CURVE security with valid credentials
+    puts("Check CURVE security with valid credentials");
+    client = zmq_socket (ctx, ZMQ_DEALER);
+    assert (client);
+    rc = zmq_setsockopt (client, ZMQ_CURVE_SERVERKEY, server2_public, 41);
+    assert (rc == 0);
+    rc = zmq_setsockopt (client, ZMQ_CURVE_PUBLICKEY, client_public, 41);
+    assert (rc == 0);
+    rc = zmq_setsockopt (client, ZMQ_CURVE_SECRETKEY, client_secret, 41);
+    assert (rc == 0);
+    rc = zmq_connect (client, my_endpoint);
+    assert (rc == 0);
+    bounce (server, client);
+    rc = zmq_close (client);
+    assert (rc == 0);
+
+#ifdef ZMQ_BUILD_DRAFT_API
+    event = get_monitor_event (server_mon, NULL, NULL);
+    assert (event == ZMQ_EVENT_HANDSHAKE_SUCCEED);
+#endif
+
     //  Check CURVE security with a garbage server key
+    puts("Check CURVE security with a garbage server key");
     //  This will be caught by the curve_server class, not passed to ZAP
     char garbage_key [] = "0000000000000000000000000000000000000000";
     client = zmq_socket (ctx, ZMQ_DEALER);
@@ -267,6 +275,7 @@ int main (void)
 #endif
 
     //  Check CURVE security with a garbage client public key
+    puts("Check CURVE security with a garbage client public key");
     //  This will be caught by the curve_server class, not passed to ZAP
     client = zmq_socket (ctx, ZMQ_DEALER);
     assert (client);
@@ -287,6 +296,7 @@ int main (void)
 #endif
 
     //  Check CURVE security with a garbage client secret key
+    puts("Check CURVE security with a garbage client secret key");
     //  This will be caught by the curve_server class, not passed to ZAP
     client = zmq_socket (ctx, ZMQ_DEALER);
     assert (client);
@@ -307,6 +317,7 @@ int main (void)
 #endif
 
     //  Check CURVE security with bogus client credentials
+    puts("Check CURVE security with bogus client credentials");
     //  This must be caught by the ZAP handler
     char bogus_public [41];
     char bogus_secret [41];
@@ -331,6 +342,7 @@ int main (void)
 #endif
 
     //  Check CURVE security with NULL client credentials
+    puts("Check CURVE security with NULL client credentials");
     //  This must be caught by the curve_server class, not passed to ZAP
     client = zmq_socket (ctx, ZMQ_DEALER);
     assert (client);
@@ -345,6 +357,7 @@ int main (void)
 #endif
 
     //  Check CURVE security with PLAIN client credentials
+    puts("Check CURVE security with PLAIN client credentials");
     //  This must be caught by the curve_server class, not passed to ZAP
     client = zmq_socket (ctx, ZMQ_DEALER);
     assert (client);
@@ -388,6 +401,7 @@ int main (void)
     close (s);
 
     //  Check return codes for invalid buffer sizes
+    puts("Check return codes for invalid buffer sizes");
     client = zmq_socket (ctx, ZMQ_DEALER);
     assert (client);
     errno = 0;
@@ -403,6 +417,7 @@ int main (void)
     assert (rc == 0);
 
     //  Shutdown
+    puts("Shutdown");
 #ifdef ZMQ_BUILD_DRAFT_API
     close_zero_linger (server_mon);
 #endif

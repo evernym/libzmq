@@ -65,7 +65,6 @@ zmq::curve_server_t::~curve_server_t ()
 int zmq::curve_server_t::next_handshake_command (msg_t *msg_)
 {
     int rc = 0;
-
     switch (state) {
         case send_welcome:
             rc = produce_welcome (msg_);
@@ -265,6 +264,14 @@ zmq::mechanism_t::status_t zmq::curve_server_t::status () const
         return mechanism_t::handshaking;
 }
 
+static void hexdump_curve_key(const zmq::curve_key_t *k)
+{
+  for(int i = 0; i< CURVE_KEYSIZE; i++)
+  {
+    printf("%02hhX ", k->key[i]);
+  }
+}
+
 int zmq::curve_server_t::process_hello (msg_t *msg_)
 {
     if (msg_->size () != 200 &&
@@ -307,13 +314,25 @@ int zmq::curve_server_t::process_hello (msg_t *msg_)
     memset (hello_box, 0, crypto_box_BOXZEROBYTES);
     memcpy (hello_box + crypto_box_BOXZEROBYTES, hello + 120, 80);
 
-    if (msg_->size () != 232) {
+    if (msg_->size () == 232) {
         // server public key exists - process it
         curve_key_t pk;
         curve_key_t sk;
         memcpy (&pk, hello + 200, CURVE_KEYSIZE);
-        sk = curve_key_store[pk];
-        memcpy(&secret_key, &sk.key, CURVE_KEYSIZE);
+
+        try {
+            sk = curve_key_store.at(pk);
+            memcpy(&secret_key, &sk.key, CURVE_KEYSIZE);
+        } catch (const std::out_of_range& oor) {
+            puts("CURVE I: public key not found, try to use curve_secret_key");
+        }
+
+#if 0
+        printf("-------------------------------------\n");
+        printf("PROCESS HELLO------------------------\n");
+        hexdump_curve_key(&sk);
+        printf("\n-------------------------------------\n");
+#endif
     }
 
     //  Open Box [64 * %x0](C'->S)

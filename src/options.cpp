@@ -97,15 +97,6 @@ bool zmq::operator==(const zmq::curve_key_t &lhs, const zmq::curve_key_t &rhs) {
   return !memcmp(lhs.key, rhs.key, CURVE_KEYSIZE);
 }
 
-static void hexdump_curve_key(const zmq::curve_key_t *k)
-{
-  for(int i = 0; i< CURVE_KEYSIZE; i++)
-  {
-    printf("%02hhX ", k->key[i]);
-  }
-}
-
-
 int zmq::options_t::set_curve_key(curve_key_t *destination, const void * optval_, size_t optvallen_)
 {
     switch (optvallen_) {
@@ -467,12 +458,6 @@ int zmq::options_t::setsockopt (int option_, const void *optval_,
 
         case ZMQ_CURVE_PUBLICKEY:
             if(0 == set_curve_key(&curve_public_key, optval_, optvallen_)) {
-#if 0
-                printf("-------------------------------------\n");
-                printf("ZMQ_CURVE_PUBLICKEY------------------\n");
-                hexdump_curve_key(&curve_public_key);
-                printf("\n-------------------------------------\n");
-#endif
                 return 0;
             }
             break;
@@ -482,21 +467,6 @@ int zmq::options_t::setsockopt (int option_, const void *optval_,
               static uint8_t zero[CURVE_KEYSIZE] = { 0 };
               if(as_server && memcmp(&curve_public_key, zero, CURVE_KEYSIZE)) {
                 curve_key_store.insert(std::make_pair(curve_public_key, curve_secret_key));
-
-#if 0
-                printf("-------------------------------------\n");
-                printf("ZMQ_CURVE_SECRETKEY------------------\n");
-                for (std::unordered_map<curve_key_t,curve_key_t>::iterator it=curve_key_store.begin();
-                     it!=curve_key_store.end();
-                     it++)
-                {
-                  hexdump_curve_key(&it->first);
-                  printf("\n");
-                  hexdump_curve_key(&it->second);
-                  printf("\n");
-                }
-                printf("-------------------------------------\n");
-#endif
               }
               return 0;
             }
@@ -504,13 +474,6 @@ int zmq::options_t::setsockopt (int option_, const void *optval_,
 
         case ZMQ_CURVE_SERVERKEY:
             if(0 == set_curve_key(&curve_server_key, optval_, optvallen_)) {
-#if 0
-                printf("-------------------------------------\n");
-                printf("ZMQ_CURVE_SERVERKEY------------------\n");
-                hexdump_curve_key(&curve_server_key);
-                printf("\n-------------------------------------\n");
-#endif
-
                 as_server = 0;
                 return 0;
             }

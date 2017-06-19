@@ -264,14 +264,6 @@ zmq::mechanism_t::status_t zmq::curve_server_t::status () const
         return mechanism_t::handshaking;
 }
 
-static void hexdump_curve_key(const zmq::curve_key_t *k)
-{
-  for(int i = 0; i< CURVE_KEYSIZE; i++)
-  {
-    printf("%02hhX ", k->key[i]);
-  }
-}
-
 int zmq::curve_server_t::process_hello (msg_t *msg_)
 {
     if (msg_->size () != 200 &&
@@ -326,13 +318,6 @@ int zmq::curve_server_t::process_hello (msg_t *msg_)
         } catch (const std::out_of_range& oor) {
             puts("CURVE I: public key not found, try to use curve_secret_key");
         }
-
-#if 0
-        printf("-------------------------------------\n");
-        printf("PROCESS HELLO------------------------\n");
-        hexdump_curve_key(&sk);
-        printf("\n-------------------------------------\n");
-#endif
     }
 
     //  Open Box [64 * %x0](C'->S)

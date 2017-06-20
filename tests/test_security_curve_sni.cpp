@@ -139,6 +139,18 @@ static void zap_handler (void *handler)
     zmq_close (handler);
 }
 
+static int add_keypair(void *socket, char *pk, char *sk)
+{
+    char pair[82];
+    memcpy(&pair[0], pk, 41);
+    memcpy(&pair[41], sk, 41);
+    return zmq_setsockopt(socket, ZMQ_CURVE_ADD_KEYPAIR, pair, 82);
+}
+
+static int remove_keypair(void *socket, char *pk)
+{
+    return zmq_setsockopt(socket, ZMQ_CURVE_REMOVE_KEYPAIR, pk, 41);
+}
 
 int main (void)
 {
@@ -174,14 +186,10 @@ int main (void)
     rc = zmq_setsockopt (server, ZMQ_CURVE_SERVER, &as_server, sizeof (int));
     assert (rc == 0);
 
-    rc = zmq_setsockopt (server, ZMQ_CURVE_PUBLICKEY, server1_public, 41);
-    assert (rc == 0);
-    rc = zmq_setsockopt (server, ZMQ_CURVE_SECRETKEY, server1_secret, 41);
+    rc = add_keypair(server, server1_public, server1_secret);
     assert (rc == 0);
 
-    rc = zmq_setsockopt (server, ZMQ_CURVE_PUBLICKEY, server2_public, 41);
-    assert (rc == 0);
-    rc = zmq_setsockopt (server, ZMQ_CURVE_SECRETKEY, server2_secret, 41);
+    rc = add_keypair(server, server2_public, server2_secret);
     assert (rc == 0);
 
     rc = zmq_setsockopt (server, ZMQ_IDENTITY, "IDENT", 6);

@@ -464,10 +464,6 @@ int zmq::options_t::setsockopt (int option_, const void *optval_,
 
         case ZMQ_CURVE_SECRETKEY:
             if(0 == set_curve_key(&curve_secret_key, optval_, optvallen_)) {
-              static uint8_t zero[CURVE_KEYSIZE] = { 0 };
-              if(as_server && memcmp(&curve_public_key, zero, CURVE_KEYSIZE)) {
-                curve_key_store.insert(std::make_pair(curve_public_key, curve_secret_key));
-              }
               return 0;
             }
             break;
@@ -476,6 +472,39 @@ int zmq::options_t::setsockopt (int option_, const void *optval_,
             if(0 == set_curve_key(&curve_server_key, optval_, optvallen_)) {
                 as_server = 0;
                 return 0;
+            }
+            break;
+
+        case ZMQ_CURVE_ADD_KEYPAIR:
+            {
+                if(optvallen_ & 1)
+                    break;
+
+                int keylen = optvallen_ >> 1;
+                const void *pk = optval_;
+                const void *sk = (const void*)((char*)optval_ + keylen);
+
+                if(set_curve_key(&curve_public_key, pk, keylen))
+                    break;
+
+                if(set_curve_key(&curve_secret_key, sk, keylen))
+                    break;
+
+                static uint8_t zero[CURVE_KEYSIZE] = { 0 };
+                if(as_server && memcmp(&curve_public_key, zero, CURVE_KEYSIZE)) {
+                    curve_key_store.insert(std::make_pair(curve_public_key, curve_secret_key));
+                }
+                return 0;
+            }
+            break;
+
+        case ZMQ_CURVE_REMOVE_KEYPAIR:
+            {
+                curve_key_t pk;
+                if(0 == set_curve_key(&pk, optval_, optvallen_)) {
+                    curve_key_store.erase(pk);
+                    return 0;
+                }
             }
             break;
 #endif

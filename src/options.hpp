@@ -227,7 +227,7 @@ namespace zmq
         curve_key_t curve_public_key;
         curve_key_t curve_secret_key;
         curve_key_t curve_server_key;
-        std::unordered_map<curve_key_t, curve_key_t> curve_key_store;
+        std::unordered_map<curve_key_t, curve_key_t> *curve_key_store;
 
         //  Principals for GSSAPI mechanism
         std::string gss_principal;

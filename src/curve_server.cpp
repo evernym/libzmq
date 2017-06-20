@@ -46,12 +46,13 @@ zmq::curve_server_t::curve_server_t (session_base_t *session_,
     peer_address (peer_address_),
     state (expect_hello),
     cn_nonce (1),
-    cn_peer_nonce(1),
-    curve_key_store(options_.curve_key_store)
+    cn_peer_nonce(1)
 {
     int rc;
     //  Fetch our secret key from socket options
     memcpy (secret_key, &options_.curve_secret_key, crypto_box_SECRETKEYBYTES);
+
+    curve_key_store = options_.curve_key_store;
 
     //  Generate short-term key pair
     rc = crypto_box_keypair (cn_public, cn_secret);
@@ -313,10 +314,12 @@ int zmq::curve_server_t::process_hello (msg_t *msg_)
         memcpy (&pk, hello + 200, CURVE_KEYSIZE);
 
         try {
-            sk = curve_key_store.at(pk);
+            sk = curve_key_store->at(pk);
             memcpy(&secret_key, &sk.key, CURVE_KEYSIZE);
         } catch (const std::out_of_range& oor) {
-            puts("CURVE I: public key not found, try to use curve_secret_key");
+            puts("CURVE I: public key not found");
+            errno = EPROTO;
+            return -1;
         }
     }
 

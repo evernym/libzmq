@@ -120,7 +120,7 @@ namespace zmq
         uint8_t cn_precom [crypto_box_BEFORENMBYTES];
 
         // All key pairs
-        std::unordered_map<curve_key_t, curve_key_t> curve_key_store;
+        std::unordered_map<curve_key_t, curve_key_t> *curve_key_store;
 
         int process_hello (msg_t *msg_);
         int produce_welcome (msg_t *msg_);

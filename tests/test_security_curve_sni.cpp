@@ -218,8 +218,8 @@ int main (void)
 #endif
 
     void *client;
-    //  Check CURVE security with valid credentials
-    puts("Check CURVE security with valid credentials");
+    //  Check CURVE security with valid credentials: server#1
+    puts("Check CURVE security with valid credentials: server#1");
     client = zmq_socket (ctx, ZMQ_DEALER);
     assert (client);
     rc = zmq_setsockopt (client, ZMQ_CURVE_SERVERKEY, server1_public, 41);
@@ -239,8 +239,8 @@ int main (void)
     assert (event == ZMQ_EVENT_HANDSHAKE_SUCCEED);
 #endif
 
-    //  Check CURVE security with valid credentials
-    puts("Check CURVE security with valid credentials");
+    //  Check CURVE security with valid credentials: server#2
+    puts("Check CURVE security with valid credentials: server#2");
     client = zmq_socket (ctx, ZMQ_DEALER);
     assert (client);
     rc = zmq_setsockopt (client, ZMQ_CURVE_SERVERKEY, server2_public, 41);
@@ -258,6 +258,28 @@ int main (void)
 #ifdef ZMQ_BUILD_DRAFT_API
     event = get_monitor_event (server_mon, NULL, NULL);
     assert (event == ZMQ_EVENT_HANDSHAKE_SUCCEED);
+#endif
+
+    //  Check CURVE security with a removed server#1 key
+    puts("Check CURVE security with a removed server#1 key");
+    rc = remove_keypair(server, server1_public);
+    assert (rc == 1); // 1 keypair removed
+    client = zmq_socket (ctx, ZMQ_DEALER);
+    assert (client);
+    rc = zmq_setsockopt (client, ZMQ_CURVE_SERVERKEY, server1_public, 41);
+    assert (rc == 0);
+    rc = zmq_setsockopt (client, ZMQ_CURVE_PUBLICKEY, client_public, 41);
+    assert (rc == 0);
+    rc = zmq_setsockopt (client, ZMQ_CURVE_SECRETKEY, client_secret, 41);
+    assert (rc == 0);
+    rc = zmq_connect (client, my_endpoint);
+    assert (rc == 0);
+    expect_bounce_fail (server, client);
+    close_zero_linger (client);
+
+#ifdef ZMQ_BUILD_DRAFT_API
+    event = get_monitor_event (server_mon, NULL, NULL);
+    assert (event == ZMQ_EVENT_HANDSHAKE_FAILED);
 #endif
 
     //  Check CURVE security with a garbage server key
@@ -287,7 +309,7 @@ int main (void)
     //  This will be caught by the curve_server class, not passed to ZAP
     client = zmq_socket (ctx, ZMQ_DEALER);
     assert (client);
-    rc = zmq_setsockopt (client, ZMQ_CURVE_SERVERKEY, server1_public, 41);
+    rc = zmq_setsockopt (client, ZMQ_CURVE_SERVERKEY, server2_public, 41);
     assert (rc == 0);
     rc = zmq_setsockopt (client, ZMQ_CURVE_PUBLICKEY, garbage_key, 41);
     assert (rc == 0);
@@ -308,7 +330,7 @@ int main (void)
     //  This will be caught by the curve_server class, not passed to ZAP
     client = zmq_socket (ctx, ZMQ_DEALER);
     assert (client);
-    rc = zmq_setsockopt (client, ZMQ_CURVE_SERVERKEY, server1_public, 41);
+    rc = zmq_setsockopt (client, ZMQ_CURVE_SERVERKEY, server2_public, 41);
     assert (rc == 0);
     rc = zmq_setsockopt (client, ZMQ_CURVE_PUBLICKEY, client_public, 41);
     assert (rc == 0);
@@ -333,7 +355,7 @@ int main (void)
 
     client = zmq_socket (ctx, ZMQ_DEALER);
     assert (client);
-    rc = zmq_setsockopt (client, ZMQ_CURVE_SERVERKEY, server1_public, 41);
+    rc = zmq_setsockopt (client, ZMQ_CURVE_SERVERKEY, server2_public, 41);
     assert (rc == 0);
     rc = zmq_setsockopt (client, ZMQ_CURVE_PUBLICKEY, bogus_public, 41);
     assert (rc == 0);
@@ -413,7 +435,7 @@ int main (void)
     client = zmq_socket (ctx, ZMQ_DEALER);
     assert (client);
     errno = 0;
-    rc = zmq_setsockopt (client, ZMQ_CURVE_SERVERKEY, server1_public, 123);
+    rc = zmq_setsockopt (client, ZMQ_CURVE_SERVERKEY, server2_public, 123);
     assert (rc == -1 && errno == EINVAL);
     errno = 0;
     rc = zmq_setsockopt (client, ZMQ_CURVE_PUBLICKEY, client_public, 123);

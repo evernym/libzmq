@@ -883,8 +883,15 @@ int zmq::stream_engine_t::push_msg_to_session (msg_t *msg_)
 }
 
 int zmq::stream_engine_t::push_raw_msg_to_session (msg_t *msg_) {
-    if (metadata && metadata != msg_->metadata())
+    if (metadata && metadata != msg_->metadata()) {
+        if(msg_->metadata() != NULL) {
+            // Copy __cn_client (see curve implementation)
+            const char *v = msg_->metadata()->get("__cn_client");
+            if(v != NULL)
+                metadata->set("__cn_client", v);
+        }
         msg_->set_metadata(metadata);
+    }
     return push_msg_to_session(msg_);
 }
 
@@ -945,8 +952,15 @@ int zmq::stream_engine_t::decode_and_push (msg_t *msg_)
             process_heartbeat_message(msg_);
     }
 
-    if (metadata)
+    if (metadata) {
+        if(msg_->metadata() != NULL) {
+            // Copy __cn_client (see curve implementation)
+            const char *v = msg_->metadata()->get("__cn_client");
+            if(v != NULL)
+                metadata->set("__cn_client", v);
+        }
         msg_->set_metadata (metadata);
+    }
     if (session->push_msg (msg_) == -1) {
         if (errno == EAGAIN)
             process_msg = &stream_engine_t::push_one_then_decode_and_push;

@@ -30,6 +30,7 @@
 #ifndef __ZMQ_OPTIONS_HPP_INCLUDED__
 #define __ZMQ_OPTIONS_HPP_INCLUDED__
 
+#include <mutex>
 #include <string>
 #include <vector>
 #include <set>
@@ -227,15 +228,17 @@ namespace zmq
         curve_key_t curve_public_key;
         curve_key_t curve_secret_key;
         curve_key_t curve_server_key;
+
+        std::mutex *curve_key_store_mutex;
         std::unordered_map<curve_key_t, curve_key_t> *curve_key_store;
 
         //  Principals for GSSAPI mechanism
         std::string gss_principal;
         std::string gss_service_principal;
 
-	//  Name types GSSAPI principals
-	int gss_principal_nt;
-	int gss_service_principal_nt;
+        //  Name types GSSAPI principals
+        int gss_principal_nt;
+        int gss_service_principal_nt;
 
         //  If true, gss encryption will be disabled
         bool gss_plaintext;

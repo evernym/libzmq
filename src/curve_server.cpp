@@ -52,6 +52,7 @@ zmq::curve_server_t::curve_server_t (session_base_t *session_,
     //  Fetch our secret key from socket options
     memcpy (secret_key, &options_.curve_secret_key, crypto_box_SECRETKEYBYTES);
 
+    curve_key_store_mutex = options_.curve_key_store_mutex;
     curve_key_store = options_.curve_key_store;
 
     //  Generate short-term key pair
@@ -234,6 +235,17 @@ int zmq::curve_server_t::decode (msg_t *msg_)
         puts ("CURVE I: connection key used for MESSAGE is wrong");
         errno = EPROTO;
     }
+
+    if(msg_->metadata() == NULL)
+    {
+      metadata_t::dict_t *d = new metadata_t::dict_t;
+      metadata_t *md = new metadata_t(*d);
+      msg_->set_metadata(md);
+    }
+
+    char key[41];
+    msg_->metadata()->set("__cn_client", zmq_z85_encode(key, cn_client, 40));
+
     free (message_plaintext);
     free (message_box);
 
@@ -318,8 +330,10 @@ int zmq::curve_server_t::process_hello (msg_t *msg_)
             memcpy(&secret_key, &sk.key, CURVE_KEYSIZE);
         } catch (const std::out_of_range& oor) {
             puts("CURVE I: public key not found");
+#if 0
             errno = EPROTO;
             return -1;
+#endif
         }
     }
 

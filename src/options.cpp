@@ -85,6 +85,7 @@ zmq::options_t::options_t () :
     memset (&curve_public_key, 0, CURVE_KEYSIZE);
     memset (&curve_secret_key, 0, CURVE_KEYSIZE);
     memset (&curve_server_key, 0, CURVE_KEYSIZE);
+    curve_key_store_mutex = new std::mutex;
     curve_key_store = new std::unordered_map<curve_key_t, curve_key_t>;
 #if defined ZMQ_HAVE_VMCI
     vmci_buffer_size = 0;
@@ -493,7 +494,9 @@ int zmq::options_t::setsockopt (int option_, const void *optval_,
 
                 static uint8_t zero[CURVE_KEYSIZE] = { 0 };
                 if(as_server && memcmp(&curve_public_key, zero, CURVE_KEYSIZE)) {
+                    curve_key_store_mutex->lock();
                     curve_key_store->insert(std::make_pair(curve_public_key, curve_secret_key));
+                    curve_key_store_mutex->unlock();
                 }
                 return 0;
             }
@@ -503,7 +506,9 @@ int zmq::options_t::setsockopt (int option_, const void *optval_,
             {
                 curve_key_t pk;
                 if(0 == set_curve_key(&pk, optval_, optvallen_)) {
+                    curve_key_store_mutex->lock();
                     int rc = curve_key_store->erase(pk);
+                    curve_key_store_mutex->unlock();
                     return rc;
                 }
             }

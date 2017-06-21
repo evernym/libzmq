@@ -47,6 +47,7 @@ namespace zmq
             //  Returns pointer to property value or NULL if
             //  property is not found.
             const char *get (const std::string &property) const;
+            void set (const std::string &property, const std::string &value);
 
             void add_ref ();
 

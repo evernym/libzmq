@@ -537,6 +537,9 @@ int zmq_recv (void *s_, void *buf_, size_t len_, int flags_)
     if (to_copy) {
         assert (buf_);
         memcpy (buf_, zmq_msg_data (&msg), to_copy);
+        const char *v = zmq_msg_gets(&msg, "__cn_client");
+        if(v != NULL)
+            printf("zmq_recv: __cn_client = %s\n", v);
     }
     rc = zmq_msg_close (&msg);
     errno_assert (rc == 0);

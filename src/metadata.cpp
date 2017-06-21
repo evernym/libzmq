@@ -45,6 +45,11 @@ const char *zmq::metadata_t::get (const std::string &property) const
         return it->second.c_str ();
 }
 
+void zmq::metadata_t::set (const std::string &property, const std::string &value)
+{
+    dict[property] = value;
+}
+
 void zmq::metadata_t::add_ref ()
 {
     ref_cnt.add (1);

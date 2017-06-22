@@ -3,9 +3,9 @@ exec_prefix=${prefix}
 libdir=${prefix}/lib
 includedir=${prefix}/include
 
-Name: libzmq
+Name: libzmq-pw
 Description: 0MQ c++ library
 Version: @ZMQ_VERSION_MAJOR@.@ZMQ_VERSION_MINOR@.@ZMQ_VERSION_PATCH@
-Libs: -L${libdir} -lzmq
+Libs: -L${libdir} -lzmq-pw
 Libs.private: -lstdc++ @pkg_config_libs_private@
 Cflags: -I${includedir} @pkg_config_defines@

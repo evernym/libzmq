@@ -139,7 +139,7 @@ if(WIN32)
 endif()
 
 # add library and include dirs for all targets
-link_libraries(libzmq ${OPTIONAL_LIBRARIES})
+link_libraries(libzmq-pw ${OPTIONAL_LIBRARIES})
 include_directories("${CMAKE_SOURCE_DIR}/../include")
 
 foreach(test ${tests})
@@ -147,7 +147,7 @@ foreach(test ${tests})
   if(WIN32)
     # This is the output for Debug dynamic builds on Visual Studio 6.0
     # You should provide the correct directory, don't know how to do it automatically
-    find_path(LIBZMQ_PATH "libzmq.lib" PATHS "../bin/Win32/Debug/v120/dynamic")
+    find_path(LIBZMQ_PATH "libzmq-pw.lib" PATHS "../bin/Win32/Debug/v120/dynamic")
     if(NOT ${LIBZMQ_PATH} STREQUAL "LIBZMQ_PATH-NOTFOUND")
         SET_TARGET_PROPERTIES( ${test} PROPERTIES LINK_FLAGS "/LIBPATH:${LIBZMQ_PATH}" )
     endif()

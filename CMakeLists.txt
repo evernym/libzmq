@@ -1,7 +1,7 @@
 # CMake build script for ZeroMQ
 
 cmake_minimum_required (VERSION 2.8.12)
-project (ZeroMQ)
+project (ZeroMQpw)
 
 list (INSERT CMAKE_MODULE_PATH 0 "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -900,13 +900,13 @@ if (MSVC)
           EXPORT ${PROJECT_NAME}-targets
           ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
           LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-          PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+          PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/zmq-pw
           COMPONENT SDK)
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     install (TARGETS ${target_outputs}
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+            PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/zmq-pw
             COMPONENT SDK)
     if (NOT CMAKE_PDB_OUTPUT_DIRECTORY)
       install (FILES ${CMAKE_CURRENT_BINARY_DIR}/bin/libzmq${MSVC_TOOLSET}-mt-gd-${ZMQ_VERSION_MAJOR}_${ZMQ_VERSION_MINOR}_${ZMQ_VERSION_PATCH}.pdb DESTINATION lib
@@ -915,7 +915,7 @@ if (MSVC)
   elseif (BUILD_SHARED)
     install (TARGETS libzmq-pw
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-            PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+            PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/zmq-pw
             COMPONENT Runtime)
   endif ()
 else ()
@@ -925,7 +925,7 @@ else ()
           ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
           LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
           FRAMEWORK DESTINATION "Library/Frameworks"
-          PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+          PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/zmq-pw)
 endif ()
 
 # install (FILES ${public_headers}
@@ -942,13 +942,13 @@ foreach (readme ${readme-docs})
   configure_file (${CMAKE_CURRENT_SOURCE_DIR}/${readme} ${CMAKE_CURRENT_BINARY_DIR}/${readme}.txt)
 
   if (NOT ZMQ_BUILD_FRAMEWORK)
-    install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${readme}.txt DESTINATION share/zmq)
+    install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${readme}.txt DESTINATION share/zmq-pw)
   endif ()
 endforeach ()
 
 if (WITH_DOC)
   if (NOT ZMQ_BUILD_FRAMEWORK)
-    install (FILES ${html-docs} DESTINATION doc/zmq COMPONENT RefGuide)
+    install (FILES ${html-docs} DESTINATION doc/zmq-pw COMPONENT RefGuide)
   endif ()
 endif ()
 

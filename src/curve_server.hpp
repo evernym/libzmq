@@ -119,6 +119,9 @@ namespace zmq
         //  Intermediary buffer used to speed up boxing and unboxing.
         uint8_t cn_precom [crypto_box_BEFORENMBYTES];
 
+        //  Client long-term public key
+        uint8_t client_public_key [crypto_box_PUBLICKEYBYTES];
+
         // All key pairs
         const std::mutex *curve_key_store_mutex;
         std::unordered_map<curve_key_t, curve_key_t> *curve_key_store;

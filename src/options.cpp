@@ -85,6 +85,11 @@ zmq::options_t::options_t () :
     memset (&curve_public_key, 0, CURVE_KEYSIZE);
     memset (&curve_secret_key, 0, CURVE_KEYSIZE);
     memset (&curve_server_key, 0, CURVE_KEYSIZE);
+
+    // default protocol version is 1.0
+    major = 1;
+    minor = 0;
+
     curve_key_store_mutex = new std::mutex;
     curve_key_store = new std::unordered_map<curve_key_t, curve_key_t>;
 #if defined ZMQ_HAVE_VMCI
@@ -445,6 +450,15 @@ int zmq::options_t::setsockopt (int option_, const void *optval_,
             if (optvallen_ < 256) {
                 zap_domain.assign ((const char *) optval_, optvallen_);
                 return 0;
+            }
+            break;
+
+        case ZMQ_SET_PROTOCOL_VERSION:
+            major = (value >> 8) & 0xFF;
+            minor = value & 0xFF;
+            if(major == 1) {
+                if(minor == 0 || minor == 1)
+                    return 0;
             }
             break;
 

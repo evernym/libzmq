@@ -122,6 +122,9 @@ namespace zmq
         //  Client long-term public key
         uint8_t client_public_key [crypto_box_PUBLICKEYBYTES];
 
+        uint8_t major;
+        uint8_t minor;
+
         // All key pairs
         const std::mutex *curve_key_store_mutex;
         std::unordered_map<curve_key_t, curve_key_t> *curve_key_store;

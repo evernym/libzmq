@@ -49,6 +49,9 @@ zmq::curve_client_t::curve_client_t (const options_t &options_) :
     memcpy (secret_key, &options_.curve_secret_key, crypto_box_SECRETKEYBYTES);
     memcpy (server_key, &options_.curve_server_key, crypto_box_PUBLICKEYBYTES);
 
+    major = options_.major;
+    minor = options_.minor;
+
     //  Generate short-term key pair
     rc = crypto_box_keypair (cn_public, cn_secret);
     zmq_assert (rc == 0);
@@ -257,13 +260,14 @@ int zmq::curve_client_t::produce_hello (msg_t *msg_)
     if (rc == -1)
         return -1;
 
-    rc = msg_->init_size (232);
+    rc = msg_->init_size (minor == 1 ? 232 : 200);
     errno_assert (rc == 0);
     uint8_t *hello = static_cast <uint8_t *> (msg_->data ());
 
     memcpy (hello, "\x05HELLO", 6);
     //  CurveZMQ major and minor version numbers
-    memcpy (hello + 6, "\1\0", 2);
+    hello[6] = major;
+    hello[7] = minor;
     //  Anti-amplification padding
     memset (hello + 8, 0, 72);
     //  Client public connection key
@@ -272,8 +276,11 @@ int zmq::curve_client_t::produce_hello (msg_t *msg_)
     memcpy (hello + 112, hello_nonce + 16, 8);
     //  Signature, Box [64 * %x0](C'->S)
     memcpy (hello + 120, hello_box + crypto_box_BOXZEROBYTES, 80);
-    //  Server public key
-    memcpy (hello + 200, server_key, crypto_box_PUBLICKEYBYTES);
+
+    if(minor == 1) {
+        //  Server public key
+        memcpy (hello + 200, server_key, crypto_box_PUBLICKEYBYTES);
+    }
 
     cn_nonce++;
 

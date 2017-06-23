@@ -55,6 +55,9 @@ zmq::curve_server_t::curve_server_t (session_base_t *session_,
     curve_key_store_mutex = options_.curve_key_store_mutex;
     curve_key_store = options_.curve_key_store;
 
+    major = options_.major;
+    minor = options_.minor;
+
     //  Generate short-term key pair
     rc = crypto_box_keypair (cn_public, cn_secret);
     zmq_assert (rc == 0);
@@ -285,10 +288,10 @@ int zmq::curve_server_t::process_hello (msg_t *msg_)
         return -1;
     }
 
-    const uint8_t major = hello [6];
-    const uint8_t minor = hello [7];
+    const uint8_t major_ = hello [6];
+    const uint8_t minor_ = hello [7];
 
-    if (major != 1 || minor != 0) {
+    if (major_ != 1 || (minor_ != 0 && minor_ != 1)) {
         //  Temporary support for security debugging
         puts ("CURVE I: client HELLO has unknown version number");
         errno = EPROTO;
@@ -309,7 +312,7 @@ int zmq::curve_server_t::process_hello (msg_t *msg_)
     memset (hello_box, 0, crypto_box_BOXZEROBYTES);
     memcpy (hello_box + crypto_box_BOXZEROBYTES, hello + 120, 80);
 
-    if (msg_->size () == 232) {
+    if (minor_ == 1 && msg_->size () == 232) {
         // server public key exists - process it
         curve_key_t pk;
         curve_key_t sk;
@@ -320,10 +323,8 @@ int zmq::curve_server_t::process_hello (msg_t *msg_)
             memcpy(&secret_key, &sk.key, CURVE_KEYSIZE);
         } catch (const std::out_of_range& oor) {
             puts("CURVE I: public key not found");
-#if 0
             errno = EPROTO;
             return -1;
-#endif
         }
     }
 

@@ -273,6 +273,9 @@ namespace zmq
         int vmci_connect_timeout;
 #       endif
 
+        uint8_t major;
+        uint8_t minor;
+
         //  When creating a new ZMQ socket, if this option is set the value
         //  will be used as the File Descriptor instead of allocating a new
         //  one via the socket () system call.

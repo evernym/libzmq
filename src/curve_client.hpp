@@ -107,6 +107,9 @@ namespace zmq
         //  Intermediary buffer used to speed up boxing and unboxing.
         uint8_t cn_precom [crypto_box_BEFORENMBYTES];
 
+        uint8_t major;
+        uint8_t minor;
+
         //  Nonce
         uint64_t cn_nonce;
         uint64_t cn_peer_nonce;

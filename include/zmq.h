@@ -370,6 +370,9 @@ ZMQ_EXPORT const char *zmq_msg_gets (const zmq_msg_t *msg, const char *property)
 #define ZMQ_USE_FD 89
 #define ZMQ_CURVE_ADD_KEYPAIR 90
 #define ZMQ_CURVE_REMOVE_KEYPAIR 91
+#define ZMQ_SET_PROTOCOL_VERSION 92
+
+#define ZMQ_MAKE_PROTO_VERSION(J, I) (((J) << 8) | (I))
 
 /*  Message options                                                           */
 #define ZMQ_MORE 1

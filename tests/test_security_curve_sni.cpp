@@ -231,6 +231,9 @@ int main (void)
 
     rc = zmq_setsockopt (client, ZMQ_IDENTITY, "CLIENTIDENT", 12);
     assert (rc == 0);
+    int proto_version = ZMQ_MAKE_PROTO_VERSION(1, 1);
+    rc = zmq_setsockopt (client, ZMQ_SET_PROTOCOL_VERSION, &proto_version, sizeof(int));
+    assert (rc == 0);
 
     rc = zmq_connect (client, my_endpoint);
     assert (rc == 0);
@@ -253,6 +256,13 @@ int main (void)
     assert (rc == 0);
     rc = zmq_setsockopt (client, ZMQ_CURVE_SECRETKEY, client_secret, 41);
     assert (rc == 0);
+
+    rc = zmq_setsockopt (client, ZMQ_IDENTITY, "CLIENTIDENT", 12);
+    assert (rc == 0);
+    proto_version = ZMQ_MAKE_PROTO_VERSION(1, 1);
+    rc = zmq_setsockopt (client, ZMQ_SET_PROTOCOL_VERSION, &proto_version, sizeof(int));
+    assert (rc == 0);
+
     rc = zmq_connect (client, my_endpoint);
     assert (rc == 0);
     bounce (server, client);
@@ -276,6 +286,13 @@ int main (void)
     assert (rc == 0);
     rc = zmq_setsockopt (client, ZMQ_CURVE_SECRETKEY, client_secret, 41);
     assert (rc == 0);
+
+    rc = zmq_setsockopt (client, ZMQ_IDENTITY, "CLIENTIDENT", 12);
+    assert (rc == 0);
+    proto_version = ZMQ_MAKE_PROTO_VERSION(1, 1);
+    rc = zmq_setsockopt (client, ZMQ_SET_PROTOCOL_VERSION, &proto_version, sizeof(int));
+    assert (rc == 0);
+
     rc = zmq_connect (client, my_endpoint);
     assert (rc == 0);
     expect_bounce_fail (server, client);
@@ -298,6 +315,13 @@ int main (void)
     assert (rc == 0);
     rc = zmq_setsockopt (client, ZMQ_CURVE_SECRETKEY, client_secret, 41);
     assert (rc == 0);
+
+    rc = zmq_setsockopt (client, ZMQ_IDENTITY, "CLIENTIDENT", 12);
+    assert (rc == 0);
+    proto_version = ZMQ_MAKE_PROTO_VERSION(1, 1);
+    rc = zmq_setsockopt (client, ZMQ_SET_PROTOCOL_VERSION, &proto_version, sizeof(int));
+    assert (rc == 0);
+
     rc = zmq_connect (client, my_endpoint);
     assert (rc == 0);
     expect_bounce_fail (server, client);
@@ -319,6 +343,13 @@ int main (void)
     assert (rc == 0);
     rc = zmq_setsockopt (client, ZMQ_CURVE_SECRETKEY, client_secret, 41);
     assert (rc == 0);
+
+    rc = zmq_setsockopt (client, ZMQ_IDENTITY, "CLIENTIDENT", 12);
+    assert (rc == 0);
+    proto_version = ZMQ_MAKE_PROTO_VERSION(1, 1);
+    rc = zmq_setsockopt (client, ZMQ_SET_PROTOCOL_VERSION, &proto_version, sizeof(int));
+    assert (rc == 0);
+
     rc = zmq_connect (client, my_endpoint);
     assert (rc == 0);
     expect_bounce_fail (server, client);
@@ -340,6 +371,13 @@ int main (void)
     assert (rc == 0);
     rc = zmq_setsockopt (client, ZMQ_CURVE_SECRETKEY, garbage_key, 41);
     assert (rc == 0);
+
+    rc = zmq_setsockopt (client, ZMQ_IDENTITY, "CLIENTIDENT", 12);
+    assert (rc == 0);
+    proto_version = ZMQ_MAKE_PROTO_VERSION(1, 1);
+    rc = zmq_setsockopt (client, ZMQ_SET_PROTOCOL_VERSION, &proto_version, sizeof(int));
+    assert (rc == 0);
+
     rc = zmq_connect (client, my_endpoint);
     assert (rc == 0);
     expect_bounce_fail (server, client);
@@ -365,6 +403,13 @@ int main (void)
     assert (rc == 0);
     rc = zmq_setsockopt (client, ZMQ_CURVE_SECRETKEY, bogus_secret, 41);
     assert (rc == 0);
+
+    rc = zmq_setsockopt (client, ZMQ_IDENTITY, "CLIENTIDENT", 12);
+    assert (rc == 0);
+    proto_version = ZMQ_MAKE_PROTO_VERSION(1, 1);
+    rc = zmq_setsockopt (client, ZMQ_SET_PROTOCOL_VERSION, &proto_version, sizeof(int));
+    assert (rc == 0);
+
     rc = zmq_connect (client, my_endpoint);
     assert (rc == 0);
     expect_bounce_fail (server, client);
@@ -380,6 +425,13 @@ int main (void)
     //  This must be caught by the curve_server class, not passed to ZAP
     client = zmq_socket (ctx, ZMQ_DEALER);
     assert (client);
+
+    rc = zmq_setsockopt (client, ZMQ_IDENTITY, "CLIENTIDENT", 12);
+    assert (rc == 0);
+    proto_version = ZMQ_MAKE_PROTO_VERSION(1, 1);
+    rc = zmq_setsockopt (client, ZMQ_SET_PROTOCOL_VERSION, &proto_version, sizeof(int));
+    assert (rc == 0);
+
     rc = zmq_connect (client, my_endpoint);
     assert (rc == 0);
     expect_bounce_fail (server, client);

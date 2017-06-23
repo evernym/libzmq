@@ -236,13 +236,6 @@ int zmq::curve_server_t::decode (msg_t *msg_)
         errno = EPROTO;
     }
 
-    if(msg_->metadata() == NULL)
-    {
-      metadata_t::dict_t *d = new metadata_t::dict_t;
-      metadata_t *md = new metadata_t(*d);
-      msg_->set_metadata(md);
-    }
-
     free (message_plaintext);
     free (message_box);
 

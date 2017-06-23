@@ -228,6 +228,10 @@ int main (void)
     assert (rc == 0);
     rc = zmq_setsockopt (client, ZMQ_CURVE_SECRETKEY, client_secret, 41);
     assert (rc == 0);
+
+    rc = zmq_setsockopt (client, ZMQ_IDENTITY, "CLIENTIDENT", 12);
+    assert (rc == 0);
+
     rc = zmq_connect (client, my_endpoint);
     assert (rc == 0);
     bounce (server, client);

@@ -243,9 +243,6 @@ int zmq::curve_server_t::decode (msg_t *msg_)
       msg_->set_metadata(md);
     }
 
-    char key[crypto_box_PUBLICKEYBYTES*5/4+1];
-    msg_->metadata()->set("__cn_client", zmq_z85_encode(key, client_public_key, crypto_box_PUBLICKEYBYTES));
-
     free (message_plaintext);
     free (message_box);
 
@@ -545,6 +542,11 @@ int zmq::curve_server_t::process_initiate (msg_t *msg_)
         state = send_ready;
 
     memcpy(client_public_key, client_key, crypto_box_PUBLICKEYBYTES);
+    const std::string name = "__cn_client";
+    char key[crypto_box_PUBLICKEYBYTES*5/4+1];
+    const std::string value = zmq_z85_encode(key, client_public_key, crypto_box_PUBLICKEYBYTES);
+    zmtp_properties.insert(metadata_t::dict_t::value_type (
+                             name, value));
 
     return parse_metadata (initiate_plaintext + crypto_box_ZEROBYTES + 128,
                            clen - crypto_box_ZEROBYTES - 128);

@@ -243,8 +243,8 @@ int zmq::curve_server_t::decode (msg_t *msg_)
       msg_->set_metadata(md);
     }
 
-    char key[41];
-    msg_->metadata()->set("__cn_client", zmq_z85_encode(key, client_public_key, 40));
+    char key[crypto_box_PUBLICKEYBYTES*5/4+1];
+    msg_->metadata()->set("__cn_client", zmq_z85_encode(key, client_public_key, crypto_box_PUBLICKEYBYTES));
 
     free (message_plaintext);
     free (message_box);

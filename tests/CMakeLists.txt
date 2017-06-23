@@ -139,7 +139,13 @@ if(WIN32)
 endif()
 
 # add library and include dirs for all targets
-link_libraries(libzmq-pw ${OPTIONAL_LIBRARIES})
+if (BUILD_SHARED)
+    link_libraries(libzmq-pw ${OPTIONAL_LIBRARIES})
+endif()
+if (BUILD_STATIC)
+    link_libraries(libzmq-pw-static ${OPTIONAL_LIBRARIES} -lpthread)
+endif()
+
 include_directories("${CMAKE_SOURCE_DIR}/../include")
 
 foreach(test ${tests})
